@@ -63,6 +63,60 @@ function scheduleTone(ctx, frequency) {
   };
 }
 
+// === Tine Data ===
+// Left-to-right order as seen in mbira-a-tuning.jpg.
+// Frequencies use 12-TET with A4 = 440 Hz.
+// `row: 'long'` = longer tine (extends below the bridge in the photo)
+// `row: 'short'` = shorter tine (sits above the bridge)
+
+const NOTE_FREQ = {
+  // octave 3
+  'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56,
+  'E3': 164.81, 'F3': 174.61, 'F#3': 185.00,
+  'G3': 196.00, 'G#3': 207.65,
+  'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+  // octave 4
+  'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13,
+  'E4': 329.63, 'F4': 349.23, 'F#4': 369.99,
+  'G4': 392.00, 'G#4': 415.30,
+  'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+  // octave 5
+  'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25,
+  'E5': 659.25, 'F5': 698.46, 'F#5': 739.99,
+  'G5': 783.99, 'G#5': 830.61,
+  'A5': 880.00, 'B5': 987.77,
+};
+
+const TINES = [
+  // Left manual — alternating long/short, descending toward center then ascending
+  { id: 0,  note: 'B3',  freq: NOTE_FREQ['B3'],  row: 'long',  side: 'left'   },
+  { id: 1,  note: 'A4',  freq: NOTE_FREQ['A4'],  row: 'short', side: 'left'   },
+  { id: 2,  note: 'G#3', freq: NOTE_FREQ['G#3'], row: 'long',  side: 'left'   },
+  { id: 3,  note: 'G#4', freq: NOTE_FREQ['G#4'], row: 'short', side: 'left'   },
+  { id: 4,  note: 'F#3', freq: NOTE_FREQ['F#3'], row: 'long',  side: 'left'   },
+  { id: 5,  note: 'F#4', freq: NOTE_FREQ['F#4'], row: 'short', side: 'left'   },
+  { id: 6,  note: 'E3',  freq: NOTE_FREQ['E3'],  row: 'long',  side: 'left'   },
+  { id: 7,  note: 'D4',  freq: NOTE_FREQ['D4'],  row: 'short', side: 'left'   },
+  { id: 8,  note: 'D3',  freq: NOTE_FREQ['D3'],  row: 'long',  side: 'left'   },
+  { id: 9,  note: 'E4',  freq: NOTE_FREQ['E4'],  row: 'short', side: 'left'   },
+  { id: 10, note: 'C#3', freq: NOTE_FREQ['C#3'], row: 'long',  side: 'left'   },
+  { id: 11, note: 'A4b', freq: NOTE_FREQ['A4'],  row: 'short', side: 'left'   },
+
+  // Center
+  { id: 12, note: 'A3c', freq: NOTE_FREQ['A3'],  row: 'long',  side: 'center' },
+  { id: 13, note: 'A4c', freq: NOTE_FREQ['A4'],  row: 'short', side: 'center' },
+
+  // Right manual — ascending toward the right edge
+  { id: 14, note: 'C#5', freq: NOTE_FREQ['C#5'], row: 'short', side: 'right'  },
+  { id: 15, note: 'A4r', freq: NOTE_FREQ['A4'],  row: 'short', side: 'right'  },
+  { id: 16, note: 'B4',  freq: NOTE_FREQ['B4'],  row: 'short', side: 'right'  },
+  { id: 17, note: 'C#5r',freq: NOTE_FREQ['C#5'], row: 'short', side: 'right'  },
+  { id: 18, note: 'D5',  freq: NOTE_FREQ['D5'],  row: 'short', side: 'right'  },
+  { id: 19, note: 'E5',  freq: NOTE_FREQ['E5'],  row: 'short', side: 'right'  },
+  { id: 20, note: 'F#5', freq: NOTE_FREQ['F#5'], row: 'short', side: 'right'  },
+  { id: 21, note: 'A5',  freq: NOTE_FREQ['A5'],  row: 'short', side: 'right'  },
+];
+
 // === Bootstrap (temporary test) ===
 
 document.addEventListener('DOMContentLoaded', () => {

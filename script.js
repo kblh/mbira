@@ -13,8 +13,14 @@ function ensureAudioContext() {
 
 function playNote(frequency) {
   const ctx = ensureAudioContext();
-  if (ctx.state === 'suspended') ctx.resume();
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(() => scheduleTone(ctx, frequency));
+  } else {
+    scheduleTone(ctx, frequency);
+  }
+}
 
+function scheduleTone(ctx, frequency) {
   const now = ctx.currentTime;
   const attack = 0.005;
   const decay = 2.2;

@@ -63,3 +63,57 @@ html, body {
     display: none;
   }
 }
+
+/* === Tines === */
+
+.mbira {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(180deg, #2a1f17 0%, #1a1410 60%, #0f0a08 100%);
+}
+
+.tine-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.tine-group--center {
+  margin: 0 8px;
+}
+
+.tine {
+  position: relative;
+  width: 22px;
+  border: none;
+  border-radius: 4px 4px 1px 1px;
+  background: linear-gradient(180deg, #d4c4a8 0%, #a08868 50%, #7a6448 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  touch-action: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+
+.tine--short {
+  height: 60%;
+}
+
+.tine--long {
+  height: 85%;
+}
+
+.tine__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #2a1f17;
+  background: #f0e4cc;
+  padding: 2px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+}

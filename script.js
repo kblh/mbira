@@ -117,14 +117,48 @@ const TINES = [
   { id: 21, note: 'A5',  freq: NOTE_FREQ['A5'],  row: 'short', side: 'right'  },
 ];
 
-// === Bootstrap (temporary test) ===
+// === Rendering ===
+
+function displayLabel(note) {
+  // Strip internal suffix (e.g., 'A4c' -> 'A', 'C#5r' -> 'C#')
+  return note.replace(/[0-9].*$/, '');
+}
+
+function renderMbira(root, tines) {
+  // Three column groups: left, center, right.
+  const groups = { left: [], center: [], right: [] };
+  for (const tine of tines) groups[tine.side].push(tine);
+
+  const fragment = document.createDocumentFragment();
+
+  for (const side of ['left', 'center', 'right']) {
+    const group = document.createElement('div');
+    group.className = `tine-group tine-group--${side}`;
+
+    for (const tine of groups[side]) {
+      const el = document.createElement('button');
+      el.className = `tine tine--${tine.row}`;
+      el.dataset.id = String(tine.id);
+      el.dataset.freq = String(tine.freq);
+      el.setAttribute('aria-label', `${displayLabel(tine.note)}, ${tine.freq.toFixed(2)} Hz`);
+
+      const label = document.createElement('span');
+      label.className = 'tine__label';
+      label.textContent = displayLabel(tine.note);
+      el.appendChild(label);
+
+      group.appendChild(el);
+    }
+
+    fragment.appendChild(group);
+  }
+
+  root.replaceChildren(fragment);
+}
+
+// === Bootstrap ===
 
 document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('test-btn');
-  if (btn) {
-    btn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      playNote(440);
-    });
-  }
+  const root = document.getElementById('mbira');
+  renderMbira(root, TINES);
 });

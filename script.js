@@ -4,8 +4,6 @@
 
 let audioCtx = null;
 let audioUnlocked = false;
-let lastNoteHz = 0;
-let scheduleCount = 0;
 
 function ensureAudioContext() {
   if (audioCtx) return audioCtx;
@@ -41,31 +39,6 @@ function playNote(frequency) {
     ctx.resume();
   }
   scheduleTone(ctx, frequency);
-  lastNoteHz = frequency;
-  scheduleCount++;
-  updateDebug();
-}
-
-// === Debug overlay (visible on screen so we can diagnose without Web Inspector)
-let debugEl = null;
-function updateDebug() {
-  if (!debugEl) {
-    debugEl = document.createElement('div');
-    debugEl.id = 'audio-debug';
-    debugEl.style.cssText =
-      'position:fixed;top:4px;left:4px;z-index:200;' +
-      'background:rgba(0,0,0,0.7);color:#0f0;font:10px/1.3 monospace;' +
-      'padding:4px 6px;border-radius:4px;pointer-events:none;';
-    document.body.appendChild(debugEl);
-  }
-  const ctx = audioCtx;
-  debugEl.textContent =
-    `ctx: ${ctx ? ctx.state : 'none'} | ` +
-    `unlocked: ${audioUnlocked} | ` +
-    `taps: ${scheduleCount} | ` +
-    `lastHz: ${lastNoteHz.toFixed(1)} | ` +
-    `t: ${ctx ? ctx.currentTime.toFixed(2) : '-'} | ` +
-    `sr: ${ctx ? ctx.sampleRate : '-'}`;
 }
 
 function scheduleTone(ctx, frequency) {
@@ -220,9 +193,12 @@ function attachInput(root) {
     const freq = parseFloat(tineEl.dataset.freq);
     if (!Number.isFinite(freq)) return;
 
+    // Deliberately NOT using setPointerCapture: on iOS Safari, capturing the
+    // first pointer can suppress pointerdown events for simultaneous touches,
+    // breaking multi-touch chords. The pressed Map + bubbled pointerup/cancel
+    // on root cover cleanup correctly without capture.
     tineEl.classList.add('is-pressed');
     pressed.set(e.pointerId, tineEl);
-    try { tineEl.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
 
     playNote(freq);
   }, { passive: false });
@@ -246,19 +222,4 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('mbira');
   renderMbira(root, TINES);
   attachInput(root);
-  updateDebug();
-
-  // Global one-time audio unlock — captures the very first user gesture
-  // anywhere on the document (touchend is what iOS canonically recognizes
-  // as a completed gesture for autoplay policy).
-  const globalUnlock = () => {
-    const ctx = ensureAudioContext();
-    unlockAudioOnce(ctx);
-    if (ctx.state === 'suspended') ctx.resume();
-    updateDebug();
-    document.removeEventListener('touchend', globalUnlock);
-    document.removeEventListener('click', globalUnlock);
-  };
-  document.addEventListener('touchend', globalUnlock, { once: false });
-  document.addEventListener('click', globalUnlock, { once: false });
 });

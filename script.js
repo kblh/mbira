@@ -4,6 +4,8 @@
 
 let audioCtx = null;
 let audioUnlocked = false;
+let lastNoteHz = 0;
+let scheduleCount = 0;
 
 function ensureAudioContext() {
   if (audioCtx) return audioCtx;
@@ -12,28 +14,58 @@ function ensureAudioContext() {
   return audioCtx;
 }
 
-// iOS Safari requires audio unlock via a silent buffer played synchronously
-// inside the first user gesture. resume() alone is not always sufficient.
+// iOS Safari needs multiple unlock signals inside the first user gesture.
 function unlockAudioOnce(ctx) {
   if (audioUnlocked) return;
-  const buffer = ctx.createBuffer(1, 1, 22050);
+  // 1. Silent buffer trick (works on older iOS)
+  const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.connect(ctx.destination);
   source.start(0);
+  // 2. Tiny audible-tier oscillator at zero gain (forces newer iOS to wake up)
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, ctx.currentTime);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.001);
   audioUnlocked = true;
 }
 
 function playNote(frequency) {
   const ctx = ensureAudioContext();
   unlockAudioOnce(ctx);
-  // resume() must be called inside a user gesture on mobile; do it synchronously
-  // and do NOT wait for the promise — scheduling proceeds in the same tick so
-  // the iOS user-gesture window does not expire.
   if (ctx.state === 'suspended') {
     ctx.resume();
   }
   scheduleTone(ctx, frequency);
+  lastNoteHz = frequency;
+  scheduleCount++;
+  updateDebug();
+}
+
+// === Debug overlay (visible on screen so we can diagnose without Web Inspector)
+let debugEl = null;
+function updateDebug() {
+  if (!debugEl) {
+    debugEl = document.createElement('div');
+    debugEl.id = 'audio-debug';
+    debugEl.style.cssText =
+      'position:fixed;top:4px;left:4px;z-index:200;' +
+      'background:rgba(0,0,0,0.7);color:#0f0;font:10px/1.3 monospace;' +
+      'padding:4px 6px;border-radius:4px;pointer-events:none;';
+    document.body.appendChild(debugEl);
+  }
+  const ctx = audioCtx;
+  debugEl.textContent =
+    `ctx: ${ctx ? ctx.state : 'none'} | ` +
+    `unlocked: ${audioUnlocked} | ` +
+    `taps: ${scheduleCount} | ` +
+    `lastHz: ${lastNoteHz.toFixed(1)} | ` +
+    `t: ${ctx ? ctx.currentTime.toFixed(2) : '-'} | ` +
+    `sr: ${ctx ? ctx.sampleRate : '-'}`;
 }
 
 function scheduleTone(ctx, frequency) {
@@ -214,4 +246,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('mbira');
   renderMbira(root, TINES);
   attachInput(root);
+  updateDebug();
+
+  // Global one-time audio unlock — captures the very first user gesture
+  // anywhere on the document (touchend is what iOS canonically recognizes
+  // as a completed gesture for autoplay policy).
+  const globalUnlock = () => {
+    const ctx = ensureAudioContext();
+    unlockAudioOnce(ctx);
+    if (ctx.state === 'suspended') ctx.resume();
+    updateDebug();
+    document.removeEventListener('touchend', globalUnlock);
+    document.removeEventListener('click', globalUnlock);
+  };
+  document.addEventListener('touchend', globalUnlock, { once: false });
+  document.addEventListener('click', globalUnlock, { once: false });
 });

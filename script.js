@@ -3,6 +3,7 @@
 // === Audio Engine ===
 
 let audioCtx = null;
+let audioUnlocked = false;
 
 function ensureAudioContext() {
   if (audioCtx) return audioCtx;
@@ -11,17 +12,34 @@ function ensureAudioContext() {
   return audioCtx;
 }
 
+// iOS Safari requires audio unlock via a silent buffer played synchronously
+// inside the first user gesture. resume() alone is not always sufficient.
+function unlockAudioOnce(ctx) {
+  if (audioUnlocked) return;
+  const buffer = ctx.createBuffer(1, 1, 22050);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
+  audioUnlocked = true;
+}
+
 function playNote(frequency) {
   const ctx = ensureAudioContext();
+  unlockAudioOnce(ctx);
+  // resume() must be called inside a user gesture on mobile; do it synchronously
+  // and do NOT wait for the promise — scheduling proceeds in the same tick so
+  // the iOS user-gesture window does not expire.
   if (ctx.state === 'suspended') {
-    ctx.resume().then(() => scheduleTone(ctx, frequency));
-  } else {
-    scheduleTone(ctx, frequency);
+    ctx.resume();
   }
+  scheduleTone(ctx, frequency);
 }
 
 function scheduleTone(ctx, frequency) {
-  const now = ctx.currentTime;
+  // Small offset protects against past-time scheduling while the context
+  // is finishing its async resume.
+  const now = ctx.currentTime + 0.01;
   const attack = 0.005;
   const decay = 2.2;
   const peakGain = 0.35;

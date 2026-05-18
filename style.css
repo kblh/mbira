@@ -140,7 +140,6 @@ html, body {
   cursor: pointer;
   touch-action: none;
   display: flex;
-  flex-direction: column-reverse;
   align-items: center;
   padding: 0;
   transition: transform 60ms ease-out, filter 60ms ease-out;
@@ -162,7 +161,6 @@ html, body {
   padding: 2px 3px;
   border-radius: 3px;
   pointer-events: none;
-  margin-top: 4px;
   letter-spacing: 0.3px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }

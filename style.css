@@ -175,3 +175,8 @@ html, body {
   position: absolute;
   top: calc(55% - 4px); /* sits just below the bridge */
 }
+
+.tine.is-pressed {
+  transform: translateY(3px);
+  filter: brightness(1.2);
+}

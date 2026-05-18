@@ -161,14 +161,33 @@ function renderMbira(root, tines) {
 function attachInput(root) {
   // Use pointer events on the root and delegate based on target.
   // pointerdown fires for touch, mouse, and pen — supports multi-touch.
+  const pressed = new Map(); // pointerId -> tine element
+
   root.addEventListener('pointerdown', (e) => {
     const tineEl = e.target.closest('.tine');
     if (!tineEl) return;
     e.preventDefault();
     const freq = parseFloat(tineEl.dataset.freq);
     if (!Number.isFinite(freq)) return;
+
+    tineEl.classList.add('is-pressed');
+    pressed.set(e.pointerId, tineEl);
+    try { tineEl.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+
     playNote(freq);
   }, { passive: false });
+
+  const release = (e) => {
+    const tineEl = pressed.get(e.pointerId);
+    if (tineEl) {
+      tineEl.classList.remove('is-pressed');
+      pressed.delete(e.pointerId);
+    }
+  };
+
+  root.addEventListener('pointerup', release);
+  root.addEventListener('pointercancel', release);
+  root.addEventListener('pointerleave', release);
 }
 
 // === Bootstrap ===

@@ -156,9 +156,25 @@ function renderMbira(root, tines) {
   root.replaceChildren(fragment);
 }
 
+// === Input Handling ===
+
+function attachInput(root) {
+  // Use pointer events on the root and delegate based on target.
+  // pointerdown fires for touch, mouse, and pen — supports multi-touch.
+  root.addEventListener('pointerdown', (e) => {
+    const tineEl = e.target.closest('.tine');
+    if (!tineEl) return;
+    e.preventDefault();
+    const freq = parseFloat(tineEl.dataset.freq);
+    if (!Number.isFinite(freq)) return;
+    playNote(freq);
+  }, { passive: false });
+}
+
 // === Bootstrap ===
 
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('mbira');
   renderMbira(root, TINES);
+  attachInput(root);
 });

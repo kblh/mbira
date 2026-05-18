@@ -79,6 +79,7 @@ html, body {
   align-items: flex-end;
   gap: 4px;
   flex: 0 0 auto;
+  height: 100%;
 }
 
 .tine-group--center {

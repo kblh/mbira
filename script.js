@@ -140,7 +140,7 @@ function renderMbira(root, tines) {
       el.className = `tine tine--${tine.row}`;
       el.dataset.id = String(tine.id);
       el.dataset.freq = String(tine.freq);
-      el.setAttribute('aria-label', `${displayLabel(tine.note)}, ${tine.freq.toFixed(2)} Hz`);
+      el.setAttribute('aria-label', `${displayLabel(tine.note)}, ${tine.freq.toFixed(2)} Hz, ${tine.side}`);
 
       const label = document.createElement('span');
       label.className = 'tine__label';
